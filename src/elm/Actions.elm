@@ -7,5 +7,5 @@ import Decoder exposing (games)
 
 fetchGames : Cmd Msg
 fetchGames =
-    Http.get "http://localhost:8000/data.json" games
+    Http.get "/api/games.json" games
         |> Http.send FetchGames

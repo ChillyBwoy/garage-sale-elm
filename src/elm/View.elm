@@ -1,14 +1,14 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (type_, checked, colspan, style)
+import Html.Attributes exposing (type_, checked, colspan, style, class)
 import Html.Events exposing (onCheck)
 import Models exposing (Model, Game)
 import Messages exposing (Msg(..))
 
 
-gamesTableRowView : Game -> Html Msg
-gamesTableRowView game =
+gamesTableRowView : Int -> Game -> Html Msg
+gamesTableRowView index game =
     tr
         [ style
             [ ( "text-decoration"
@@ -19,7 +19,8 @@ gamesTableRowView game =
               )
             ]
         ]
-        [ td []
+        [ td [] [ text (toString (index + 1)) ]
+        , td []
             [ input
                 [ type_ "checkbox"
                 , checked game.sold
@@ -37,29 +38,37 @@ gamesTableRowView game =
 gamesTableView : List Game -> Html Msg
 gamesTableView games =
     let
+        total =
+            List.foldl (\g a -> a + g.price) 0 games
+
         soldGames =
             List.filter (\g -> g.sold) games
 
-        soldTotal =
+        totalSold =
             List.foldl (\g a -> a + g.price) 0 soldGames
     in
-        table []
+        table [ class "table" ]
             [ thead []
                 [ tr []
-                    [ th [] [ text "Sold" ]
+                    [ th [] [ text "#" ]
+                    , th [] [ text "Sold" ]
                     , th [] [ text "Serial" ]
                     , th [] [ text "Name" ]
                     , th [] [ text "Comment" ]
                     , th [] [ text "Price" ]
                     ]
                 ]
-            , tfoot [ colspan 5 ] [ text (toString soldTotal) ]
+            , tfoot [ colspan 6 ] [ text ((toString totalSold) ++ " / " ++ (toString total)) ]
             , tbody []
-                (List.map (\g -> gamesTableRowView g) games)
+                (List.indexedMap gamesTableRowView games)
             ]
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ gamesTableView model.games ]
+    div [ class "layout" ]
+        [ div [ class "page-header" ]
+            [ h1 [] [ text "Garage Sale" ]
+            ]
+        , gamesTableView model.games
+        ]
